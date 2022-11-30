@@ -28,8 +28,8 @@
 
       <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
         <button v-if="path !== '/'" id="show-home-page" class="dropdown-item" @click="home">Home</button>
-        <button v-if="path !== '/login'" id="show-login-page" class="dropdown-item no-user" @click="login">Log In</button>
-        <button v-if="path !== '/signup'" id="show-signup-page" class="dropdown-item no-user" @click="Signup">Sign Up</button>
+        <button v-if="path !== '/login'" id="show-login-page" class="dropdown-item no-user" @click="login">Login</button>
+        <button v-if="path !== '/signup'" id="show-signup-page" class="dropdown-item no-user" @click="Signup">Sign up</button>
       </div>
     </div>
   </header>

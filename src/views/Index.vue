@@ -4,7 +4,7 @@
       <Header/>
     </div>
 
-    <div style="margin-top: 50px">
+    <div>
       <router-view/>
     </div>
 

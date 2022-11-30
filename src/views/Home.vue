@@ -6,6 +6,7 @@
 
 <script>
 import '@/assets/css/index.css'
+import $ from "jquery";
 
 export default {
   name: "Home",
@@ -14,6 +15,11 @@ export default {
     }
   },
   created() {
+  },
+  mounted() {
+    $("#text").css({
+      "top": $("#header").height() + 10, "position": "absolute"
+    })
   },
   methods: {
   }
