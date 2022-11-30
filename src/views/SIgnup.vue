@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <div id="text" class="text">
+    This is sign up
   </div>
 </template>
 
@@ -7,7 +8,7 @@
 import '@/assets/css/index.css'
 
 export default {
-  name: "Map",
+  name: "Signup",
   data() {
     return {
     }

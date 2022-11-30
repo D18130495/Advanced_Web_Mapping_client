@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <div id="text" class="text">
+    Welcome to Yushun AWM 2022/23!
   </div>
 </template>
 
@@ -7,7 +8,7 @@
 import '@/assets/css/index.css'
 
 export default {
-  name: "Map",
+  name: "Home",
   data() {
     return {
     }

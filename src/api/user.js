@@ -1,19 +1,26 @@
 import request from '@/utils/request'
 
 export default {
-    getUserList() {
+    login(userInfo) {
         return request({
-            url: `/users`,
-            method: 'get',
+            url: `/api/login`,
+            method: 'post',
+            params: userInfo
         })
     },
-    // login(userInfo) {
-    //     return request({
-    //         url: `/admin/user/login`,
-    //         method: 'get',
-    //         params: userInfo
-    //     })
-    // },
+    logout() {
+        return request({
+            url: `/api/logout`,
+            method: 'get'
+        })
+    },
+    getUserList() {
+        return request({
+            url: `/api/users`,
+            method: 'get'
+        })
+    },
+
     // addNewUser(formData) {
     //     return request({
     //         url: `/admin/user/addNewUser`,

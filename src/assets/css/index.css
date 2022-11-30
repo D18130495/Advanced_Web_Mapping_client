@@ -26,3 +26,9 @@
     font-size: small;
     text-align: center;
 }
+
+.text {
+    padding: 1rem;
+    width: 100%;
+    position: relative;
+}
