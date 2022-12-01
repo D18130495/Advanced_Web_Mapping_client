@@ -5,33 +5,38 @@
     <form class="needs-validation" novalidate>
       <div class="mb-3">
         <label class="form-label" for="loginUsername">Username*</label>
-        <input type="text" class="form-control" id="loginUsername" v-model="username" required>
+        <input type="text" class="form-control" id="loginUsername" v-model="userInfo.username" required>
         <div class="invalid-feedback">Please enter username</div>
       </div>
 
       <div class="mb-3">
         <label  class="form-label" for="loginPassword">Password*</label>
-        <input type="password" class="form-control" id="loginPassword" v-model="password" required>
+        <input type="password" class="form-control" id="loginPassword" v-model="userInfo.password" required>
         <div class="invalid-feedback">Please enter password</div>
       </div>
 
-      <button type="submit" class="btn btn-dark" @click="login()">Log In</button>
+      <button type="button" class="btn btn-dark" @click="login()">Log In</button>
     </form>
   </div>
 </template>
 
 <script>
-import '@/assets/css/index.css'
-// import userApi from "@/api/user"
-// import token from "@/store/token"
 import $ from 'jquery'
+
+import '@/assets/css/index.css'
+
+import userApi from "@/api/user"
+import token from "@/store/token"
+
 
 export default {
   name: "Login",
   data() {
     return {
-      username: '',
-      password: ''
+      userInfo:{
+        username:'',
+        password:''
+      }
     }
   },
   created() {
@@ -62,15 +67,29 @@ export default {
   },
   methods: {
     login() {
-      // userApi.login()
-      //     .then(response => {
-      //       if(response.data.auth === true) {
-      //         token.set(response.data.token)
-      //         this.$router.push("/")
-      //       }
-      //     }).catch(error => {
-      //   console.log(error)
-      // })
+      userApi.login(this.userInfo)
+          .then(response => {
+            if(response.data.result === true) {
+              token.set(response.data.token)
+
+              this.$message({
+                message: response.data.info,
+                type: 'success'
+              })
+
+              this.$router.push("/")
+            }else {
+              this.$message({
+                message: response.data.info,
+                type: 'error'
+              })
+            }
+          }).catch(error => {
+            this.$message({
+              message: 'Something wrong: ' + error,
+              type: 'warning'
+            })
+          })
     }
   }
 }

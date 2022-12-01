@@ -3,20 +3,20 @@ import request from '@/utils/request'
 export default {
     login(userInfo) {
         return request({
-            url: `/api/login`,
+            url: `/api/login/`,
             method: 'post',
-            params: userInfo
+            data: userInfo
         })
     },
     logout() {
         return request({
-            url: `/api/logout`,
+            url: `/api/logout/`,
             method: 'get'
         })
     },
     getUserList() {
         return request({
-            url: `/api/users`,
+            url: `/api/users/`,
             method: 'get'
         })
     },

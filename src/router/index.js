@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import  VueRouter from 'vue-router'
 
-// import token from "@/store/token"
+import token from "@/store/token"
 
 import Index from "@/views/Index"
 import Home from "@/views/Home"
@@ -60,22 +60,20 @@ const router = new VueRouter({
     ]
 })
 
-// router.beforeEach((to, from, next) => {
-//     if(token.get()) {
-//         // token存在 访问login 跳转至产品证书制作页面
-//         if(to.path === '/' || to.path  === '/login'){
-//             next('/certMake')
-//         }else {
-//             next()
-//         }
-//     }else {
-//         // token不存在  路径'/'就是登录页面设置的path
-//         if(to.path === '/'){
-//             next()
-//         }else{
-//             next('/')
-//         }
-//     }
-// })
+router.beforeEach((to, from, next) => {
+    if(token.get()) {
+        if(to.path === '/' || to.path  === '/login' || to.path  === '/signup'){
+            next('/map')
+        }else {
+            next()
+        }
+    }else {
+        if(to.path === '/'){
+            next()
+        }else{
+            next('/')
+        }
+    }
+})
 
 export default router

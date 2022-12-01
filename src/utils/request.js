@@ -1,7 +1,7 @@
 import axios from "axios"
 
 import token from "@/store/token"
-// import userApi from "@/api/user"
+import userApi from "@/api/user"
 
 // create an axios instance
 const service = axios.create({
@@ -33,15 +33,19 @@ service.interceptors.response.use(
     },
     error => {
         if(error.response.status === 401) {
-            // userApi.logout()
-            //     .then(response => {
-            //         console.log(response.data)
-            //
-            //     }).catch(error => {
-            //         console.log(error)
-            //     })
-            // token.clear()
-            // location.reload()
+            this.$message({
+                message: 'Your login has expired, Please login again',
+                type: 'warning'
+            })
+
+            userApi.logout()
+                .then(response => {
+                    console.log(response)
+                    token.clear()
+                    location.reload()
+                }).catch(error => {
+                    console.log(error)
+                })
         }
 
         return Promise.reject(error)
