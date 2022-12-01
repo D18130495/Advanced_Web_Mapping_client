@@ -2,26 +2,41 @@
   <div id="text" class="text">
     <h4>Login</h4>
 
-    <form class="needs-validation" novalidate>
-      <div class="mb-3">
-        <label class="form-label" for="loginUsername">Username*</label>
-        <input type="text" class="form-control" id="loginUsername" v-model="userInfo.username" required>
-        <div class="invalid-feedback">Please enter username</div>
-      </div>
+    <b-form @submit.stop.prevent="onSubmit">
+      <b-form-group id="username" label="Username*" label-for="username">
+        <b-form-input name="usernameInput"
+                      v-model="userInfo.username"
+                      :state="validateState('username')"
+                      aria-describedby="username-feedback">
+        </b-form-input>
 
-      <div class="mb-3">
-        <label  class="form-label" for="loginPassword">Password*</label>
-        <input type="password" class="form-control" id="loginPassword" v-model="userInfo.password" required>
-        <div class="invalid-feedback">Please enter password</div>
-      </div>
+        <b-form-invalid-feedback id="username-feedback">
+          This is a required field.
+        </b-form-invalid-feedback>
+      </b-form-group>
 
-      <button type="button" class="btn btn-dark" @click="login()">Log In</button>
-    </form>
+      <b-form-group id="password" label="Password*" label-for="password">
+        <b-form-input type="password"
+                      name="passwordInput"
+                      v-model="userInfo.password"
+                      :state="validateState('password')"
+                      aria-describedby="password-feedback">
+        </b-form-input>
+
+        <b-form-invalid-feedback id="password-feedback">
+          This is a required field.
+        </b-form-invalid-feedback>
+      </b-form-group>
+
+      <b-button type="submit" variant="btn btn-dark">Submit</b-button>
+    </b-form>
   </div>
 </template>
 
 <script>
 import $ from 'jquery'
+import { validationMixin } from "vuelidate"
+import { required } from "vuelidate/lib/validators"
 
 import '@/assets/css/index.css'
 
@@ -31,11 +46,22 @@ import token from "@/store/token"
 
 export default {
   name: "Login",
+  mixins: [validationMixin],
   data() {
     return {
       userInfo:{
-        username:'',
-        password:''
+        username: '',
+        password: ''
+      }
+    }
+  },
+  validations: {
+    userInfo: {
+      username: {
+        required
+      },
+      password: {
+        required
       }
     }
   },
@@ -44,26 +70,22 @@ export default {
   mounted() {
     $("#text").css({
       "top": $("#header").height() + 10, "position": "absolute"
-    });
-
-    (function() {
-      'use strict';
-      window.addEventListener('load', function() {
-        var forms = document.getElementsByClassName('needs-validation');
-
-        Array.prototype.filter.call(forms, function(form) {
-          form.addEventListener('submit', function(event) {
-            if (form.checkValidity() === false) {
-              event.preventDefault();
-              event.stopPropagation();
-            }
-            form.classList.add('was-validated');
-          }, false);
-        });
-      }, false);
-    })();
+    })
   },
   methods: {
+    validateState(name) {
+      const { $dirty, $error } = this.$v.userInfo[name]
+      return $dirty? !$error : null
+    },
+    onSubmit() {
+      this.$v.userInfo.$touch()
+
+      if(this.$v.userInfo.$anyError) {
+        return
+      }
+
+      this.login()
+    },
     login() {
       userApi.login(this.userInfo)
           .then(response => {

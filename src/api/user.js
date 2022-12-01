@@ -14,6 +14,37 @@ export default {
             method: 'get'
         })
     },
+    signup(userInfo) {
+        return request({
+            url: `/api/signup/`,
+            method: 'post',
+            data: userInfo
+        })
+    },
+    getUserInfoByToken(token) {
+        return request({
+            url: `/api/getUserInfoByToken/`,
+            method: 'get',
+            params: token
+        })
+    },
+    updateUserProfile(userInfo) {
+        return request({
+            url: `/api/updateProfile/`,
+            method: 'post',
+            data: userInfo
+        })
+    },
+    changeUserPassword(userInfo) {
+        return request({
+            url: `/api/changePassword/`,
+            method: 'post',
+            data: userInfo
+        })
+    },
+
+
+
     getUserList() {
         return request({
             url: `/api/users/`,

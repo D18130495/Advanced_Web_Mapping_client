@@ -1,30 +1,31 @@
 <template>
   <div id="text" class="text">
-    <h4>Sign up</h4>
+    <h4>Change password</h4>
 
     <b-form @submit.stop.prevent="onSubmit">
-      <b-form-group id="username" label="Username*" label-for="username">
-        <b-form-input name="usernameInput"
-                      v-model="userInfo.username"
-                      :state="validateState('username')"
-                      aria-describedby="username-feedback">
+      <b-form-group id="oldPassword" label="Old password*" label-for="oldPassword">
+        <b-form-input type="password"
+                      name="oldPasswordInput"
+                      v-model="userInfo.oldPassword"
+                      :state="validateState('oldPassword')"
+                      aria-describedby="oldPassword-feedback">
         </b-form-input>
 
-        <b-form-invalid-feedback id="username-feedback">
-          This is a required field and must be at least 4 characters.
+        <b-form-invalid-feedback id="oldPassword-feedback">
+          This is a required field.
         </b-form-invalid-feedback>
       </b-form-group>
 
-      <b-form-group id="lastName" label="Password*" label-for="lastName">
+      <b-form-group id="newPassword" label="New password*" label-for="newPassword">
         <b-form-input type="password"
-                      name="lastNameInput"
-                      v-model="userInfo.password"
-                      :state="validateState('password')"
-                      aria-describedby="password-feedback">
+                      name="newPasswordInput"
+                      v-model="userInfo.newPassword"
+                      :state="validateState('newPassword')"
+                      aria-describedby="newPassword-feedback">
         </b-form-input>
 
-        <b-form-invalid-feedback id="password-feedback">
-          This is a required field and must be at least 6 characters.
+        <b-form-invalid-feedback id="newPassword-feedback">
+          This is a required field, must be at least 6 characters and can not equal to old password.
         </b-form-invalid-feedback>
       </b-form-group>
 
@@ -49,7 +50,7 @@
 <script>
 import $ from "jquery"
 import { validationMixin } from "vuelidate"
-import { required, minLength, sameAs } from "vuelidate/lib/validators"
+import { required, minLength, sameAs, not } from "vuelidate/lib/validators"
 
 import '@/assets/css/index.css'
 import userApi from "@/api/user";
@@ -57,34 +58,36 @@ import token from "@/store/token";
 
 
 export default {
-  name: "Signup",
+  name: "ChangePassword",
   mixins: [validationMixin],
   data() {
     return {
       userInfo:{
-        username: '',
-        password: '',
+        token: '',
+        oldPassword: '',
+        newPassword: '',
         confirmPassword: ''
       }
     }
   },
   validations: {
     userInfo: {
-      username: {
-        required,
-        minLength: minLength(4)
+      oldPassword: {
+        required
       },
-      password: {
+      newPassword: {
         required,
-        minLength: minLength(6)
+        minLength: minLength(6),
+        isValid: not(sameAs('oldPassword'))
       },
       confirmPassword: {
         required,
-        sameAs: sameAs('password')
+        sameAs: sameAs('newPassword')
       }
     }
   },
   created() {
+    this.userInfo.token = token.get()
   },
   mounted() {
     $("#text").css({
@@ -103,10 +106,10 @@ export default {
         return
       }
 
-      this.signup()
+      this.changePassword()
     },
-    signup() {
-      userApi.signup(this.userInfo)
+    changePassword() {
+      userApi.changeUserPassword(this.userInfo)
           .then(response => {
             if(response.data.result === true) {
               this.$message({
@@ -114,33 +117,7 @@ export default {
                 type: 'success'
               })
 
-              setTimeout(this.login, 3000)
-            }else {
-              this.$message({
-                message: response.data.info,
-                type: 'error'
-              })
-            }
-          }).catch(error => {
-        this.$message({
-          message: 'Something wrong: ' + error,
-          type: 'warning'
-        })
-      })
-    },
-    login() {
-      userApi.login(this.userInfo)
-          .then(response => {
-            if(response.data.result === true) {
-              token.set(response.data.token)
-              token.setUser(response.data.user)
-
-              this.$message({
-                message: response.data.info,
-                type: 'success'
-              })
-
-              this.$router.push("/map")
+              this.$router.push("/")
             }else {
               this.$message({
                 message: response.data.info,

@@ -4,6 +4,9 @@
     <span v-if="path === '/'"> Home Page</span>
     <span v-if="path === '/login'"> Login</span>
     <span v-if="path === '/signup'"> Sign Up</span>
+    <span v-if="path === '/map'"> Map</span>
+    <span v-if="path === '/update-profile'"> Update Profile</span>
+    <span v-if="path === '/change-password'"> Change Password</span>
 
     <div style="float: right" class="dropdown" v-if="auth">
       <button class="btn btn-secondary" role="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -11,15 +14,15 @@
       </button>
 
       <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <a id="show-home-page" class="dropdown-item" >Home</a>
-        <a id="show-map-page" class="dropdown-item valid-user">Map</a>
-        <a id="show-change-user-page" class="dropdown-item valid-user">Update Profile</a>
-        <a id="show-change-password-page" class="dropdown-item valid-user">Change Password</a>
-        <a id="show-logout" class="dropdown-item valid-user" @click="logout">Log Out</a>
+        <button v-if="path !== '/'" id="show-home-page" class="dropdown-item" @click="toHome">Home</button>
+        <button v-if="path !== '/map'" id="show-map-page" class="dropdown-item valid-user" @click="toMap">Map</button>
+        <button v-if="path !== '/update-profile'" id="show-change-user-page" class="dropdown-item valid-user" @click="toUpdateProfile">Update Profile</button>
+        <button v-if="path !== '/change-password'" id="show-change-password-page" class="dropdown-item valid-user" @click="toChangePassword">Change Password</button>
+        <button id="show-logout" class="dropdown-item valid-user" @click="logout">Log Out</button>
       </div>
     </div>
 
-    <div style="float: right; padding: 0.5rem; font-size: initial" class="sp-username">{{ username }}</div>
+    <div style="float: right; padding: 0.5rem; font-size: initial" class="sp-username" v-if="auth">{{ username }}</div>
 
     <div style="float: right" class="dropdown" v-if="!auth">
       <button class="btn btn-secondary" role="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -65,7 +68,7 @@ export default {
     initial() {
       if(token.get() === null) {
         this.auth = false
-        this.username = null
+        this.username = ''
       }else {
         this.auth = true
         this.username = token.getUser()
@@ -76,13 +79,15 @@ export default {
           .then(response => {
             if(response.data.result === true) {
               token.clear()
+              this.username = ''
+              this.auth = false
 
               this.$message({
                 message: response.data.info,
                 type: 'success'
               })
 
-              this.$router.push("/")
+              if(this.path !== '/') this.$router.push("/")
             }else {
               this.$message({
                 message: response.data.info,
@@ -104,6 +109,15 @@ export default {
     },
     toSignup() {
       this.$router.push({ path: '/signup' })
+    },
+    toMap() {
+      this.$router.push({ path: '/map' })
+    },
+    toUpdateProfile() {
+      this.$router.push({ path: '/update-profile' })
+    },
+    toChangePassword() {
+      this.$router.push({ path: '/change-password' })
     }
   }
 }
