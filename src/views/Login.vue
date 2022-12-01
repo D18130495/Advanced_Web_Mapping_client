@@ -49,10 +49,8 @@ export default {
     (function() {
       'use strict';
       window.addEventListener('load', function() {
-        // Fetch all the forms we want to apply custom Bootstrap validation styles to
         var forms = document.getElementsByClassName('needs-validation');
 
-        // Loop over them and prevent submission
         Array.prototype.filter.call(forms, function(form) {
           form.addEventListener('submit', function(event) {
             if (form.checkValidity() === false) {
@@ -71,13 +69,14 @@ export default {
           .then(response => {
             if(response.data.result === true) {
               token.set(response.data.token)
+              token.setUser(response.data.user)
 
               this.$message({
                 message: response.data.info,
                 type: 'success'
               })
 
-              this.$router.push("/")
+              this.$router.push("/map")
             }else {
               this.$message({
                 message: response.data.info,

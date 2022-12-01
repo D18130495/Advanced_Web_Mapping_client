@@ -6,12 +6,10 @@ let token = {
         return localStorage.getItem('token')
     },
     setUser(user) {
-        localStorage.setItem('user', JSON.stringify(user))
+        localStorage.setItem('user', user)
     },
     getUser() {
-        if(localStorage.getItem('user')){
-            return JSON.parse(localStorage.getItem('user'))
-        }
+        return localStorage.getItem('user')
     },
     clear() {
         localStorage.removeItem('token')
