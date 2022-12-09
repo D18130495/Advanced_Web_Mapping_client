@@ -24,7 +24,7 @@
         </b-form-input>
 
         <b-form-invalid-feedback id="password-feedback">
-          This is a required field and must be at least 6 characters.
+          This is a required field, must be at least 8 characters(contain uppercase, lowercase and special letters)
         </b-form-invalid-feedback>
       </b-form-group>
 
@@ -54,6 +54,9 @@ import { required, minLength, sameAs } from "vuelidate/lib/validators"
 import '@/assets/css/index.css'
 import userApi from "@/api/user";
 import token from "@/store/token";
+import {regex} from "vuelidate/lib/validators/common";
+
+export var password = regex('password', /^(?![A-Za-z0-9]+$)(?![a-z0-9\W]+$)(?![A-Za-z\W]+$)(?![A-Z0-9\W]+$)[a-zA-Z0-9\W]{8,}$/);
 
 
 export default {
@@ -76,7 +79,7 @@ export default {
       },
       password: {
         required,
-        minLength: minLength(6)
+        password
       },
       confirmPassword: {
         required,

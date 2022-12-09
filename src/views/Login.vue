@@ -24,7 +24,7 @@
         </b-form-input>
 
         <b-form-invalid-feedback id="password-feedback">
-          This is a required field.
+          This is a required field, must be at least 8 characters(contain uppercase, lowercase and special letters)
         </b-form-invalid-feedback>
       </b-form-group>
 
@@ -42,6 +42,9 @@ import '@/assets/css/index.css'
 
 import userApi from "@/api/user"
 import token from "@/store/token"
+import {regex} from "vuelidate/lib/validators/common";
+
+export var password = regex('password', /^(?![A-Za-z0-9]+$)(?![a-z0-9\W]+$)(?![A-Za-z\W]+$)(?![A-Z0-9\W]+$)[a-zA-Z0-9\W]{8,}$/)
 
 
 export default {
@@ -61,7 +64,8 @@ export default {
         required
       },
       password: {
-        required
+        required,
+        password
       }
     }
   },
@@ -89,6 +93,7 @@ export default {
     login() {
       userApi.login(this.userInfo)
           .then(response => {
+            console.log(response.data)
             if(response.data.result === true) {
               token.set(response.data.token)
               token.setUser(response.data.user)

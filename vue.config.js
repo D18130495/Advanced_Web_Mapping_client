@@ -1,11 +1,5 @@
 module.exports = {
   devServer: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8000',
-        ws: false,
-        changeOrigin: true,
-      }
-    }
+    proxy: 'http://rtpi.dublinbus.ie'
   }
 }

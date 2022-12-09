@@ -87,7 +87,7 @@ export default {
       this.updateProfile()
     },
     getCurrentUserInfo() {
-      userApi.getUserInfoByToken(this.userInfo.token)
+      userApi.getCurrentUserInfo(this.userInfo.token)
           .then(response => {
             if(response.data.result === true) {
               this.userInfo.firstName = response.data.firstName

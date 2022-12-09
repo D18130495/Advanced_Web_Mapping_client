@@ -21,11 +21,10 @@ export default {
             data: userInfo
         })
     },
-    getUserInfoByToken(token) {
+    getCurrentUserInfo() {
         return request({
-            url: `/api/getUserInfoByToken/`,
-            method: 'get',
-            params: token
+            url: `/api/getCurrentUserInfo/`,
+            method: 'get'
         })
     },
     updateUserProfile(userInfo) {

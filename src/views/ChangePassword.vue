@@ -25,7 +25,7 @@
         </b-form-input>
 
         <b-form-invalid-feedback id="newPassword-feedback">
-          This is a required field, must be at least 6 characters and can not equal to old password.
+          This is a required field, must be at least 8 characters(contain uppercase, lowercase and special letters) and can not equal to old password.
         </b-form-invalid-feedback>
       </b-form-group>
 
@@ -50,11 +50,14 @@
 <script>
 import $ from "jquery"
 import { validationMixin } from "vuelidate"
-import { required, minLength, sameAs, not } from "vuelidate/lib/validators"
+import { required, sameAs, not } from "vuelidate/lib/validators"
+import { regex } from "vuelidate/lib/validators/common"
 
 import '@/assets/css/index.css'
 import userApi from "@/api/user";
 import token from "@/store/token";
+
+export var password = regex('password', /^(?![A-Za-z0-9]+$)(?![a-z0-9\W]+$)(?![A-Za-z\W]+$)(?![A-Z0-9\W]+$)[a-zA-Z0-9\W]{8,}$/)
 
 
 export default {
@@ -77,7 +80,7 @@ export default {
       },
       newPassword: {
         required,
-        minLength: minLength(6),
+        password,
         isValid: not(sameAs('oldPassword'))
       },
       confirmPassword: {
