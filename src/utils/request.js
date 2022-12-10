@@ -6,9 +6,7 @@ import userApi from "@/api/user"
 // create an axios instance
 const service = axios.create({
     baseURL: 'http://127.0.0.1:8000',
-    // url: 'http://127.0.0.1:8000',
     crossdomain: true,
-    // withCredentials: true, // send cookies when cross-domain requests
     timeout: 50000
 })
 

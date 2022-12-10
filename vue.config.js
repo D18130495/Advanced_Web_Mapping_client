@@ -1,5 +1,5 @@
 module.exports = {
   devServer: {
-    proxy: 'http://rtpi.dublinbus.ie'
+    proxy: 'https://api.irishrail.ie/realtime/realtime.asmx/'
   }
 }

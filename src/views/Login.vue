@@ -93,7 +93,6 @@ export default {
     login() {
       userApi.login(this.userInfo)
           .then(response => {
-            console.log(response.data)
             if(response.data.result === true) {
               token.set(response.data.token)
               token.setUser(response.data.user)
