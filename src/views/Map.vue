@@ -30,23 +30,35 @@
             </div>
             <a class="mb-0 small text-muted text-right" @click="updateMap">Find yourself</a>
           </div>
+<!--          @click="penTo(item)"-->
+          <ul class="list-group"  v-if="stationDetailArray">
+            <template v-for="(item, key) in stationDetailArray">
+              <a class="list-group-item text-left" :key="key">
+                <h3>Train code: {{ item.Traincode }}</h3>
+                <p class="mb-1">
+                  Origin: {{ item.Origin}}
+                  <br>
+                  Destination: {{ item.Destination}}
+                </p>
+                <p class="mb-1">
+                  Due In: {{ item.Duein }} | Late: {{ item.Late }}
+                </p>
+                <p class="mb-1">
+                  Exp Arrival: {{ item.Exparrival }} | Exp Departure: {{ item.Expdepart }}
+                </p>
+                <p class="mb-1">
+                  Sch Arrival: {{ item.Scharrival }} | Sch Departure: {{ item.Schdepart }}
+                </p>
+              </a>
+            </template>
+          </ul>
 
-          <ul class="list-group">
-<!--            <template v-for="(item, key) in data">-->
-<!--              <a class="list-group-item text-left" :key="key"-->
-<!--                v-if="item.properties.county === select.city && item.properties.town === select.area"-->
-<!--                :class="{ 'highlight': item.properties.mask_adult || item.properties.mask_child}"-->
-<!--                @click="penTo(item)">-->
-<!--                <h3>{{ item.properties.name }}</h3>-->
-<!--                <p class="mb-0">-->
-<!--                  : {{ item.properties.mask_adult}} | :{{ item.properties.mask_child}}-->
-<!--                </p>-->
-<!--                <p class="mb-0">:<a :href="`https://www.google.com.tw/maps/place/${item.properties.address}`"-->
-<!--                  target="_blank" title="Google Map">-->
-<!--                  {{ item.properties.address }}</a>-->
-<!--                </p>-->
-<!--              </a>-->
-<!--            </template>-->
+          <ul class="list-group"  v-if="stationDetailArray.length === 0 && select.stationCode !== ''">
+            <template>
+              <div class="list-group-item text-center">
+                No train available in this station
+              </div>
+            </template>
           </ul>
         </div>
       </div>
@@ -126,7 +138,9 @@ const method = {
 
     locationMarker = L.marker(myLatLon, {
       icon: icons.grey,
-    }).addTo(osmMap)
+    }).addTo(osmMap).addTo(osmMap).bindPopup(`<strong>Current Location</strong><br>
+    Latitude:<strong>${myLatLon.lat}</strong><br>
+    Longitude:<strong>${myLatLon.lng}</strong>`).openPopup();
 
     if(circle) {
       osmMap.removeLayer(circle)
@@ -136,11 +150,7 @@ const method = {
       color: 'blue',
       fillColor: 'blue',
       fillOpacity: 0.3
-    }).addTo(osmMap).bindPopup(`<strong></strong><br>
-    : <strong></strong><br>
-    : <a href="" target="_blank">$</a><br>
-    : <br>
-    <small></small>`);
+    }).addTo(osmMap)
   },
   update_db(position) {
     let location = position.coords.longitude + ", " + position.coords.latitude
@@ -152,12 +162,14 @@ const method = {
           console.log(error.data.info)
     })
   },
-  addMapMarker(x, y) {
+  addMapMarker(x, y, name) {
     osmMap.flyTo(L.latLng(x, y), 17)
 
     L.marker([x, y], {
       icon: icons.green,
-    }).addTo(osmMap)
+    }).addTo(osmMap).bindPopup(`<strong>${name}</strong><br>
+    Latitude:<strong>${x}</strong><br>
+    Longitude:<strong>${y}</strong>`).openPopup();
 
     circle = L.circle(L.latLng(x, y), {
       color: 'blue',
@@ -206,12 +218,12 @@ export default {
 
     // $("#toolbox").css({
     //   "width": "100%",
-    //   "height": $(document).height() - ($("#header").height() + $("#footer").height() + 45)
+    //   "height": $(document).height() - ($("#header").height() + $("#footer").height() + 32)
     // });
 
     $("#map").css({
       "width": "100%",
-      "height": $(document).height() - ($("#header").height() + $("#footer").height() + 40)
+      "height": $(document).height() - ($("#header").height() + $("#footer").height() + 32)
     });
 
     osmMap = L.map('map', options)
@@ -225,6 +237,11 @@ export default {
   methods: {
     updateMap() {
       method.updateLocation(osmMap)
+      method.removeMapMarker()
+      this.stationDetail = ''
+      this.stationDetailArray = []
+      this.select.stationName = 'default'
+      this.select.stationCode = ''
     },
     getStationInfo() {
       axios({
@@ -273,12 +290,18 @@ export default {
       })
     },
     setMarker() {
-      // this.stationDetail.forEach((detial) => {
-      //   this.stationDetailArray.push(detial)
-      // })
+      if(this.stationDetail) {
+        this.stationDetail.forEach((detial) => {
+          this.stationDetailArray.push(detial)
+        })
+      }else {
+        console.log("no")
+      }
+
       method.addMapMarker(
         this.select.stationLatitude,
         this.select.stationLongitude,
+        this.select.stationName
       )
     },
     removeMarker() {
@@ -293,16 +316,30 @@ export default {
       })
     },
     queryTimetable() {
-      this.getCurrentStationLatLong()
-      this.removeMarker()
-      this.setMarker()
-      // this.getStationDetail()
-      // setTimeout(()=>{
+      this.stationDetail = ''
+      this.stationDetailArray = []
 
-      // },1000)
+      if(this.select.stationCode !== undefined) {
+        this.getStationDetail()
+
+        setTimeout(()=>{
+          this.getCurrentStationLatLong()
+          this.removeMarker()
+          this.setMarker()
+        },1500)
+      }
     }
   }
 }
 </script>
 
-<style scoped/>
+<style lang="scss">
+.toolbox {
+  height: 88.5vh;
+  overflow-y: auto;
+
+  a {
+    cursor: pointer;
+  }
+}
+</style>
