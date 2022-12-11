@@ -54,9 +54,10 @@ import { required, sameAs, not } from "vuelidate/lib/validators"
 import { regex } from "vuelidate/lib/validators/common"
 
 import '@/assets/css/index.css'
-import userApi from "@/api/user";
-import token from "@/store/token";
+import userApi from "@/api/user"
+import token from "@/store/token"
 
+// check password format
 export var password = regex('password', /^(?![A-Za-z0-9]+$)(?![a-z0-9\W]+$)(?![A-Za-z\W]+$)(?![A-Z0-9\W]+$)[a-zA-Z0-9\W]{8,}$/)
 
 
@@ -121,15 +122,10 @@ export default {
               })
 
               this.$router.push("/")
-            }else {
-              this.$message({
-                message: response.data.info,
-                type: 'error'
-              })
             }
           }).catch(error => {
         this.$message({
-          message: 'Something wrong: ' + error,
+          message: error.response.data.info,
           type: 'warning'
         })
       })

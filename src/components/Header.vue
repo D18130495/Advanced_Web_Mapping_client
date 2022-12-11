@@ -1,6 +1,6 @@
 <template>
   <header id="header" class="header">
-    <span>AWM 2022/23</span>
+    <span id="main-title" class="main-title">Irish Rail</span>
     <span v-if="path === '/'"> Home Page</span>
     <span v-if="path === '/login'"> Login</span>
     <span v-if="path === '/signup'"> Sign Up</span>
@@ -43,6 +43,9 @@ import token from "@/store/token";
 
 import userApi from "../api/user"
 
+import '@/assets/css/index.css'
+
+
 export default {
   name: "Header",
   data() {
@@ -56,6 +59,7 @@ export default {
     this.path = this.$route.path
     this.initial()
   },
+  // listen for url change
   watch: {
     $route: {
       handler() {
@@ -65,6 +69,7 @@ export default {
     }
   },
   methods: {
+    // use for auto logout
     initial() {
       if(token.get() === null) {
         this.auth = false
@@ -74,10 +79,12 @@ export default {
         this.username = token.getUser()
       }
     },
+    // logout function
     logout() {
       userApi.logout()
           .then(response => {
             if(response.data.result === true) {
+              // clear token, username and set auth to false
               token.clear()
               this.username = ''
               this.auth = false
@@ -87,18 +94,29 @@ export default {
                 type: 'success'
               })
 
+              // back to main page
               if(this.path !== '/') this.$router.push("/")
-            }else {
-              this.$message({
-                message: response.data.info,
-                type: 'error'
-              })
             }
           }).catch(error => {
-            this.$message({
-              message: 'Something wrong: ' + error,
-              type: 'warning'
-            })
+            if(error.response.status === 403) {
+              this.$message({
+                message: 'Token does not provided, logged out',
+                type: 'error'
+              })
+            }else {
+              this.$message({
+              message: error.response.data.info,
+              type: 'error'
+              })
+            }
+
+            // clear token, username and set auth to false
+            token.clear()
+            this.username = ''
+            this.auth = false
+
+            // back to main page
+            if(this.path !== '/') this.$router.push("/")
           })
     },
     toHome() {

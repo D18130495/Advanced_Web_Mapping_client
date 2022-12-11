@@ -7,5 +7,12 @@ export default {
             method: 'post',
             data: location
         })
+    },
+    queryOverpass(query) {
+        return request({
+            url: `/api/queryOverpass/`,
+            method: 'post',
+            data: query
+        })
     }
 }

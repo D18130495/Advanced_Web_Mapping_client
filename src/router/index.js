@@ -79,6 +79,8 @@ const router = new VueRouter({
     ]
 })
 
+// before each url change, if user does not have token can only go to home page, login page and signup page
+// if user have token can not go to login page and signup page
 router.beforeEach((to, from, next) => {
     if(token.get()) {
         if(to.path  === '/login' || to.path  === '/signup') {

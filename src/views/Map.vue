@@ -28,9 +28,16 @@
                 </select>
               </div>
             </div>
+
+            <div class="input-group">
+              <input type="search" class="form-control rounded" v-model="overpass.query"
+                     placeholder="Search nearby" aria-label="Search" aria-describedby="search-addon" />&nbsp;
+              <button type="button" class="btn btn-outline-primary" @click="queryOverpass">search</button>
+            </div>
+
             <a class="mb-0 small text-muted text-right" @click="updateMap">Find yourself</a>
           </div>
-<!--          @click="penTo(item)"-->
+
           <ul class="list-group"  v-if="stationDetailArray">
             <template v-for="(item, key) in stationDetailArray">
               <a class="list-group-item text-left" :key="key">
@@ -74,16 +81,22 @@
 import $ from "jquery"
 import L from 'leaflet'
 import "leaflet/dist/leaflet.css"
+import "leaflet.markercluster/dist/MarkerCluster.css"
+import "leaflet.markercluster/dist/MarkerCluster.Default.css"
+import "leaflet.markercluster"
 
 import '@/assets/css/index.css'
+import 'leaflet-search/src/leaflet-search.css'
 
 import mapApi from "@/api/map"
-import axios from "axios";
+import axios from "axios"
 
 let locationMarker
 let circle
-let osmMap = {}
+let osmMap = {} // main map
+let osmMapMarker = {} // overpass query result display layer
 
+// main map options
 const options = {
   center: [53.34, -6.27],
   minZoom: 0,
@@ -100,6 +113,7 @@ const options = {
   attribution: '<a target="_blank" href="https://www.openstreetmap.org/">© OpenStreetMap Yushun Zeng</a>'
 }
 
+// icon config
 const iconsConfig = {
   iconSize: [25, 40],
   iconAnchor: [12, 38],
@@ -107,6 +121,7 @@ const iconsConfig = {
   shadowSize: [20, 20]
 }
 
+// icon (green and grey)
 const icons = {
   green: new L.Icon({
     iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
@@ -118,7 +133,9 @@ const icons = {
   })
 }
 
+// method handle map
 const method = {
+  // get current position and call the setMapToCurrentLocation and update_db functions
   updateLocation() {
     navigator.geolocation.getCurrentPosition(
       function (position) {
@@ -127,56 +144,67 @@ const method = {
       }
     )
   },
+  // set the current location on the map
   setMapToCurrentLocation(position) {
-    console.log("In setMapToCurrentLocation.");
     let myLatLon = L.latLng(position.coords.latitude, position.coords.longitude)
     osmMap.flyTo(myLatLon, 17)
 
+    // remove marker if some marker on it
     if(locationMarker) {
       osmMap.removeLayer(locationMarker)
     }
 
+    // set to current location
     locationMarker = L.marker(myLatLon, {
       icon: icons.grey,
     }).addTo(osmMap).addTo(osmMap).bindPopup(`<strong>Current Location</strong><br>
     Latitude:<strong>${myLatLon.lat}</strong><br>
     Longitude:<strong>${myLatLon.lng}</strong>`).openPopup();
 
+    // remove circle if some circle there
     if(circle) {
       osmMap.removeLayer(circle)
     }
 
+    // draw the circle around the marker
     circle = L.circle(myLatLon, {
       color: 'blue',
       fillColor: 'blue',
       fillOpacity: 0.3
     }).addTo(osmMap)
   },
+  // update current location on the database
   update_db(position) {
+    // form the current location
     let location = position.coords.longitude + ", " + position.coords.latitude
 
+    // send the data to back-end
     mapApi.updateLocation({"location": location})
         .then(response => {
           console.log(response.data.info)
         }).catch(error => {
-          console.log(error.data.info)
+          console.log(error.response.data.info)
     })
   },
+  // add marker on the map to show the station location
   addMapMarker(x, y, name) {
     osmMap.flyTo(L.latLng(x, y), 17)
 
+    // add marker on the map
     L.marker([x, y], {
       icon: icons.green,
     }).addTo(osmMap).bindPopup(`<strong>${name}</strong><br>
     Latitude:<strong>${x}</strong><br>
     Longitude:<strong>${y}</strong>`).openPopup();
 
+    // draw the circle around marker
     circle = L.circle(L.latLng(x, y), {
       color: 'blue',
       fillColor: 'blue',
       fillOpacity: 0.3
     }).addTo(osmMap)
   },
+  // remove all the marker and circle
   removeMapMarker() {
     osmMap.eachLayer((layer) => {
       if (layer instanceof L.Marker) {
@@ -195,20 +223,24 @@ export default {
   name: "Map",
   data() {
     return {
-      stationResult: '',
-      stationArray: [],
-      station: {
+      stationResult: '', // station result from Irish rail API
+      stationArray: [], // parse the station result and store using station
+      station: { // use for station array store
         stationName: '',
         stationCode: []
       },
-      select: {
+      select: { // selected station information
         stationName: 'default',
         stationCode: '',
         stationLatitude: '',
         stationLongitude: ''
       },
-      stationDetail: '',
-      stationDetailArray: []
+      stationDetail: '', // station detail from Irish rail API
+      stationDetailArray: [], // parse the station detail
+      overpass: { // use for overpass result
+        query: '',
+        bbox: ''
+      }
     }
   },
   mounted() {
@@ -216,25 +248,38 @@ export default {
       "top": $("#header").height(), "position": "absolute"
     })
 
-    // $("#toolbox").css({
-    //   "width": "100%",
-    //   "height": $(document).height() - ($("#header").height() + $("#footer").height() + 32)
-    // });
-
     $("#map").css({
       "width": "100%",
       "height": $(document).height() - ($("#header").height() + $("#footer").height() + 32)
     });
 
+    // set map
     osmMap = L.map('map', options)
 
+    // main map
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', options).addTo(osmMap)
+
+    // left top search function
+    L.control.search({
+      url: 'https://nominatim.openstreetmap.org/search?format=json&q={s}',
+      jsonpParam: 'json_callback',
+      propertyName: 'display_name',
+      propertyLoc: ['lat','lon'],
+      zoom: 17,
+      marker: {
+        icon: icons.green
+      },
+      autoCollapse: true,
+      autoType: false,
+      minLength: 2
+    }).addTo(osmMap)
   },
   created() {
-    method.updateLocation(osmMap)
-    this.getStationInfo()
+    method.updateLocation(osmMap) // initial yourself location when open the map page
+    this.getStationInfo() // get all the station information
   },
   methods: {
+    // find yourself button clicked reset all the parameter
     updateMap() {
       method.updateLocation(osmMap)
       method.removeMapMarker()
@@ -242,15 +287,21 @@ export default {
       this.stationDetailArray = []
       this.select.stationName = 'default'
       this.select.stationCode = ''
+
+      if(osmMapMarker) {
+        osmMap.removeLayer(osmMapMarker)
+      }
     },
+    // get station information through Irish rail API
     getStationInfo() {
       axios({
-        url: "getAllStationsXML",
+        url: "/xml/getAllStationsXML",
         method: "get",
-        crossdomain: true
       }).then(response => {
+        // parse xml result
         this.stationResult = this.$x2js.xml2js(response.data).ArrayOfObjStation.objStation
 
+        // find same station name with more than one station code, and store result in stationArray
         this.stationResult.forEach((station) => {
           if(this.stationArray.findIndex((item) => item.stationName === station.StationDesc) === -1) {
             this.station.stationName = station.StationDesc
@@ -269,6 +320,7 @@ export default {
           }
         })
 
+        // sort the result by station name
         this.stationArray.sort(function(a, b) {
           const x = a['stationName']
           const y = b['stationName']
@@ -276,11 +328,14 @@ export default {
         })
       })
     },
+    // get station detail information in 60 min, use station code
     getStationDetail() {
       axios({
-        url: "getStationDataByCodeXML_WithNumMins",
+        url: "/xml/getStationDataByCodeXML_WithNumMins",
         method: "get",
         crossdomain: true,
+        changeOrigin: true,
+        ws: true,
         params: {
           StationCode: this.select.stationCode,
           NumMins: 60
@@ -289,24 +344,34 @@ export default {
         this.stationDetail = this.$x2js.xml2js(response.data).ArrayOfObjStationData.objStationData
       })
     },
+    // set the station marker
     setMarker() {
+      // remove overpass result
+      if(osmMapMarker) {
+        osmMap.removeLayer(osmMapMarker)
+      }
+
+      // store station detail in station detail array
       if(this.stationDetail) {
         this.stationDetail.forEach((detial) => {
           this.stationDetailArray.push(detial)
         })
       }else {
-        console.log("no")
+        console.log("No data for this station")
       }
 
+      // call addMapMarker to set marker on the map
       method.addMapMarker(
         this.select.stationLatitude,
         this.select.stationLongitude,
         this.select.stationName
       )
     },
+    // call removeMarker
     removeMarker() {
       method.removeMapMarker()
     },
+    // get current station latitude abd longitude
     getCurrentStationLatLong() {
       this.stationResult.forEach((station) => {
         if(station.StationDesc === this.select.stationName && station.StationCode === this.select.stationCode) {
@@ -315,6 +380,7 @@ export default {
         }
       })
     },
+    // when the station name and station code selected
     queryTimetable() {
       this.stationDetail = ''
       this.stationDetailArray = []
@@ -327,6 +393,46 @@ export default {
           this.removeMarker()
           this.setMarker()
         },1500)
+      }
+    },
+    // query overpass
+    queryOverpass() {
+      // set bbox area
+      this.overpass.bbox = osmMap.getBounds().toBBoxString()
+
+      if(osmMapMarker) {
+        osmMap.removeLayer(osmMapMarker)
+      }
+
+      // if user input something
+      if(this.overpass.query !== '') {
+        mapApi.queryOverpass(this.overpass)
+            .then(response => {
+              // create new map layer with cluster
+              osmMapMarker = L.markerClusterGroup()
+
+              // set up new layer with overpass result
+              let geoJsonLayer = L.geoJson(response.data, {
+                pointToLayer: function (feature, latlng) {
+                  return L.marker(latlng, {
+                    icon: icons.green
+                  });
+                },
+                onEachFeature: function (feature, layer) {
+                  layer.bindPopup(`<strong>${feature.properties.name}</strong><br>
+                                  Opening:<strong>${feature.properties.opening_hours}</strong><br>
+                                  Email:<strong>${feature.properties.email}</strong><br>
+                                  Phone:<strong>${feature.properties.phone}</strong><br>
+                                  Website:<strong>${feature.properties.website}</strong>`)
+                }
+              })
+
+              // set information on the overpass layer
+              osmMapMarker.addLayer(geoJsonLayer)
+
+              // add overpass layer to the main map
+              osmMap.addLayer(osmMapMarker)
+            })
       }
     }
   }

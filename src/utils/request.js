@@ -14,7 +14,7 @@ const service = axios.create({
 service.interceptors.request.use(
 config => {
         const auth = 'Token ' + token.get()
-        config.headers['Authorization'] = auth
+        config.headers['Authorization'] = auth // set token to header
         return config
     },
 error => {
@@ -29,7 +29,7 @@ service.interceptors.response.use(
     response => {
         return response
     },
-    error => {
+    error => { // handle token expired
         if(error.response.status === 401) {
             this.$message({
                 message: 'Your login has expired, Please login again',

@@ -13,6 +13,10 @@
     vertical-align: center;
 }
 
+.main-title {
+    padding: 10px;
+}
+
 .footer {
     background-color: #333333;
     color: white;

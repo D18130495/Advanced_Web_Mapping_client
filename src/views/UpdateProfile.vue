@@ -86,6 +86,7 @@ export default {
 
       this.updateProfile()
     },
+    // use for redisplay user information
     getCurrentUserInfo() {
       userApi.getCurrentUserInfo(this.userInfo.token)
           .then(response => {
@@ -108,15 +109,10 @@ export default {
               })
 
               this.$router.push("/")
-            }else {
-              this.$message({
-                message: response.data.info,
-                type: 'error'
-              })
             }
           }).catch(error => {
         this.$message({
-          message: 'Something wrong: ' + error,
+          message: error.response.data.info,
           type: 'warning'
         })
       })

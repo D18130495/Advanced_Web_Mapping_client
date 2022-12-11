@@ -6,7 +6,7 @@
 export default {
   name: 'App',
   metaInfo: {
-    title: 'Advanced Web Mapping'
+    title: 'Irish Rail Realtime Station Information'
   },
 }
 </script>
