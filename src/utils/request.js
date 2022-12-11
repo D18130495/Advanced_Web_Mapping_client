@@ -5,7 +5,7 @@ import userApi from "@/api/user"
 
 // create an axios instance
 const service = axios.create({
-    baseURL: 'http://127.0.0.1:8000',
+    baseURL: 'https://www.awm2023.site',
     crossdomain: true,
     timeout: 50000
 })

@@ -1,6 +1,7 @@
 <template>
   <div id="text" class="text">
-    Welcome to Yushun AWM 2022/23!
+    Welcome to Irish Rail Realtime Station Information!<br><br>
+    You can find the Irish rail station information and nearby services(pub, restaurant, etc.)!
   </div>
 </template>
 
