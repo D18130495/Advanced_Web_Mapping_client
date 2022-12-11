@@ -1,24 +1,10 @@
 # Advanced Web Mapping Client
 
-## Project setup
-```
-npm install
-```
+[Irish Rail](https://irishrail.awm2023.site/)
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+## Project Introduction
+- [Project Description](#Project-description)
 
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## Project Description
+This is a website for querying Irish rail station realtime information.<br>
+It can also query nearby services(pub, restaurant, etc.)
